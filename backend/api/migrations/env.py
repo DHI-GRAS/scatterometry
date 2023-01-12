@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 from alembic import context
 
 from database import engine
-from models import *
+from scatterometry.backend.api.models.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

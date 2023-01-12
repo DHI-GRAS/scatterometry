@@ -2,5 +2,6 @@ alembic
 fastapi
 GeoAlchemy2
 psycopg2-binary
+shapely
 sqlmodel
 uvicorn

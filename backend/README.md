@@ -1,4 +1,6 @@
-## Deploy the infrastructure
+# Infrastructure
+
+## Deploy
 ```
 cd ./infrastructure
 terraform init
@@ -8,6 +10,11 @@ Make sure that the changes are as expected!
 ```
 terraform apply terraform.out
 ```
+
+# API
+
+## Develop
+Go to `./api` and run `uvicorn app:app --reload`
 
 ## Deploy the backend
 

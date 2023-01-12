@@ -1,15 +1,15 @@
-from fastapi import FastAPI, Query
+from fastapi import APIRouter, Query
 from sqlalchemy import func
 from typing import Union
 
 import models
 
 
-app = FastAPI()
+router = APIRouter()
 
 
-@app.get("/records")
-async def get_model(
+@router.get("/records")
+async def get_records(
     lat_max: float = 90,
     lat_min: float = -90,
     lon_max: float = 180,
@@ -35,5 +35,7 @@ async def get_model(
         *filters
     )
     print(len(records))
+    from geoalchemy2.shape import to_shape
 
+    print(to_shape(records[0].point).y)
     return 1
