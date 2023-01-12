@@ -1,0 +1,4 @@
+alembic
+sqlmodel
+psycopg2-binary
+GeoAlchemy2
