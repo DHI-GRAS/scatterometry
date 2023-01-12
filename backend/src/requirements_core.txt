@@ -1,4 +1,6 @@
 alembic
-sqlmodel
-psycopg2-binary
+fastapi
 GeoAlchemy2
+psycopg2-binary
+sqlmodel
+uvicorn
