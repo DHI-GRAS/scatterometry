@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Query, Response
 from fastapi.responses import StreamingResponse
 from typing import Union
@@ -18,9 +19,6 @@ async def get_records(
     satellites: Union[str, None] = Query(description="A comma separated list of the satellite names", default=None),
 ):
 
-    if satellites is None:
-        satellites = ""
-
     satellites_queries = ''
     if satellites:
         satellites = ','.join([f"'{satellite.strip()}'" for satellite in satellites.split(",")])
@@ -37,5 +35,6 @@ async def get_records(
 
     stream = query_to_csv_stream(query)
     response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
+    response.headers["Content-Disposition"] = f"attachment; filename=records_{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.csv"
 
     return response
