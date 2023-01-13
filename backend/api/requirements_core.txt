@@ -1,0 +1,8 @@
+alembic
+fastapi
+GeoAlchemy2
+pandas
+psycopg2-binary
+shapely
+sqlmodel
+uvicorn
