@@ -1,7 +1,7 @@
 
 import sqlmodel
 
-from config import engine
+from database import engine
 
 
 def db_conn():

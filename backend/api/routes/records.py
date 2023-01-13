@@ -1,13 +1,8 @@
-import io
-import pandas as pd
-
 from fastapi import APIRouter, Query, Response
 from fastapi.responses import StreamingResponse
-from typing import Union, List
+from typing import Union
 
-import models
-
-from config import engine
+from database import query_to_csv_stream
 
 
 router = APIRouter()
@@ -40,10 +35,7 @@ async def get_records(
     where ST_Intersects(ST_MakeEnvelope({lon_min}, {lat_min}, {lon_max}, {lat_max}), r.point) {satellites_queries}
     """
 
-    stream = io.StringIO()
-    records = pd.read_sql_query(query, con=engine).fillna("")
-    records.to_csv(stream, index=False, header=True, sep=",",  quotechar='"')
-
+    stream = query_to_csv_stream(query)
     response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
 
     return response

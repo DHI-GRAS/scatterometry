@@ -1,5 +1,3 @@
-from sqlmodel import create_engine
-
 from os import getenv, environ
 
 
@@ -10,4 +8,4 @@ CORS_ORIGINS = [
 
 
 # DATABASE
-engine = create_engine(environ["DATABASE_URL"], echo=False, future=False)
+DATABASE_URL = environ["DATABASE_URL"]
