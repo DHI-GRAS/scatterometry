@@ -10,4 +10,4 @@ CORS_ORIGINS = [
 
 
 # DATABASE
-engine = create_engine(environ["DATABASE_URL"])
+engine = create_engine(environ["DATABASE_URL"], echo=False, future=False)
