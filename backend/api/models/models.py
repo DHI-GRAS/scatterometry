@@ -42,7 +42,8 @@ class QualityFlag(SQLModel, table=True):
     satellite_id: int = Field(index=True, foreign_key="satellite.id")
     satellite: Satellite = Relationship(back_populates="quality_flags")
     flag: str = Field(index=True)
-    description: str
+    name: str = Field(index=True)
+    description: str = Field(default=None, nullable=True)
 
     records: List["Record"] = Relationship(back_populates="quality_flag")
 
