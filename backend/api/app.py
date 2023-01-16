@@ -15,4 +15,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(records.router)
+app.include_router(records.ProjectsRoute())

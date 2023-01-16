@@ -9,6 +9,12 @@ import config
 engine = create_engine(config.DATABASE_URL, echo=False, future=False)
 
 
+def raw_query(query):
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        return result
+
+
 def query_to_df(query):
     df = pd.read_sql_query(query, con=engine)
     return df
