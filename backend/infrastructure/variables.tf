@@ -24,3 +24,9 @@ variable "tags" {
     "Type"          = "GRAS"
   }
 }
+
+variable "resources_location" {
+  description = "Location of the resources"
+  default     = "northeurope"
+  type        = string
+}
