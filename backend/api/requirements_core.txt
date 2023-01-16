@@ -1,4 +1,6 @@
 alembic
+azure-identity
+azure-storage-blob
 fastapi
 GeoAlchemy2
 pandas

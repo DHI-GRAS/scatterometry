@@ -2,8 +2,11 @@ from datetime import datetime
 from fastapi import APIRouter, Query, Response
 from fastapi.responses import StreamingResponse
 from typing import Union
+from uuid import uuid1
+
 
 from database import query_to_csv_stream
+from cloud_storage import upload_to_cloud_storage
 
 
 router = APIRouter()
@@ -49,7 +52,9 @@ async def get_records(
     where ST_Intersects(ST_MakeEnvelope({lon_min}, {lat_min}, {lon_max}, {lat_max}), r.point) {satellites_queries} {flags_queries} {timestamp_from_query} {timestamp_to_query}
     """
 
-    stream = query_to_csv_stream(query)
+    df, stream = query_to_csv_stream(query)
+    blob_file_url = upload_to_cloud_storage(f"{uuid1().hex}.csv", file_stream=stream.getvalue())
+    print(blob_file_url)
     response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
     response.headers["Content-Disposition"] = f"attachment; filename=records_{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.csv"
 
