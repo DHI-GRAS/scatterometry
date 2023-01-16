@@ -1,6 +1,5 @@
 from datetime import datetime
-from fastapi import APIRouter, Query, Response
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Query
 from typing import Union
 from uuid import uuid1
 
@@ -14,7 +13,6 @@ router = APIRouter()
 
 @router.get("/records")
 async def get_records(
-    response: Response,
     lat_max: float = 90,
     lat_min: float = -90,
     lon_max: float = 180,
@@ -53,9 +51,17 @@ async def get_records(
     """
 
     df, stream = query_to_csv_stream(query)
-    blob_file_url = upload_to_cloud_storage(f"{uuid1().hex}.csv", file_stream=stream.getvalue())
-    print(blob_file_url)
-    response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
-    response.headers["Content-Disposition"] = f"attachment; filename=records_{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.csv"
+    download_url = None
+    quota_used_bytes = None
+    if df.empty is False:
+        blob_client = upload_to_cloud_storage(f"{uuid1().hex}.csv", file_stream=stream.getvalue())
+        download_url = blob_client.url
+        quota_used_bytes = blob_client.get_blob_properties().size
 
-    return response
+    response_payload = {
+        "download_url": download_url,
+        "quota_used_bytes": quota_used_bytes,
+        "records_count": df.shape[0]
+    }
+
+    return response_payload
