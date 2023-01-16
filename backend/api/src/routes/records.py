@@ -21,12 +21,13 @@ class ProjectsRoute(APIRouter):
             lon_min: float = -180,
             timestamp_from: Union[datetime, None] = None,
             timestamp_to: Union[datetime, None] = None,
+            time_interval_from: str = None,
             satellites: Union[str, None] = Query(description="A comma separated list of the satellite names", default=None),
             flags: Union[str, None] = Query(description="A comma separated list of the quality flag names", default=None),
         ):
 
             query = self.__query(lon_min, lat_min, lon_max, lat_max, satellites,
-                flags, timestamp_from, timestamp_to, count=True
+                flags, timestamp_from, timestamp_to, time_interval_from, count=True
             )
 
             records_count = raw_query(query).one()[0]
@@ -48,12 +49,13 @@ class ProjectsRoute(APIRouter):
             lon_min: float = -180,
             timestamp_from: Union[datetime, None] = None,
             timestamp_to: Union[datetime, None] = None,
+            time_interval_from: str = None,
             satellites: Union[str, None] = Query(description="A comma separated list of the satellite names", default=None),
             flags: Union[str, None] = Query(description="A comma separated list of the quality flag names", default=None),
         ):
 
             query = self.__query(lon_min, lat_min, lon_max, lat_max, satellites,
-                flags, timestamp_from, timestamp_to, count=False
+                flags, timestamp_from, timestamp_to, time_interval_from, count=False
             )
 
             df, stream = query_to_csv_stream(query)
@@ -97,6 +99,11 @@ class ProjectsRoute(APIRouter):
             return ""
         return f"""and r."timestamp" <= '{timestamp_to}'"""
 
+    def __time_interval_from_query(self, time_interval_from):
+        if not time_interval_from:
+            return ""
+        return f"""and r."timestamp" >= NOW() - INTERVAL '{time_interval_from}'"""
+
     def __query(
         self,
         lon_min,
@@ -107,6 +114,7 @@ class ProjectsRoute(APIRouter):
         flags,
         timestamp_from,
         timestamp_to,
+        time_interval_from,
         count=False
     ):
 
@@ -114,6 +122,7 @@ class ProjectsRoute(APIRouter):
         flags_queries = self.__flags_queries(flags)
         timestamp_from_query = self.__timestamp_from_query(timestamp_from)
         timestamp_to_query = self.__timestamp_to_query(timestamp_to)
+        time_interval_from = self.__time_interval_from_query(time_interval_from)
 
         if count is True:
             select = "count(*)"
@@ -126,7 +135,7 @@ class ProjectsRoute(APIRouter):
         join satellite s on r.satellite_id = s.id
         join qualityflag q on r.quality_flag_id = q.id
         join "version" v on r.version_id = v.id
-        where ST_Intersects(ST_MakeEnvelope({lon_min}, {lat_min}, {lon_max}, {lat_max}), r.point) {satellites_queries} {flags_queries} {timestamp_from_query} {timestamp_to_query}
+        where ST_Intersects(ST_MakeEnvelope({lon_min}, {lat_min}, {lon_max}, {lat_max}), r.point) {satellites_queries} {flags_queries} {timestamp_from_query} {timestamp_to_query} {time_interval_from}
         """
 
         return query
