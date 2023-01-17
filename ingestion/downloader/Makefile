@@ -7,7 +7,7 @@ build-dev:
 build:
 	docker build -t ${REGISTRY}/${REPO}:${TAG} .
 push:
-	docker push ${REPO}:${TAG}
+	docker push ${REGISTRY}/${REPO}:${TAG}
 
 build-push: build push
 

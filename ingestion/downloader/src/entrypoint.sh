@@ -28,3 +28,11 @@ machine urs.earthdata.nasa.gov
     password $EARTHDATA_PASSWORD
 EOM
 chmod 600 $LOGIN_CREDS_FILE
+
+
+#
+# EXECUTE
+#
+
+# This takes additional arguments that were passed in the docker run command
+python ./download.py $@

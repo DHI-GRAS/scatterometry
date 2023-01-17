@@ -1,0 +1,7 @@
+podaac-data-subscriber
+sqlmodel
+geoalchemy2
+psycopg2-binary
+xarray
+netCDF4
+geopandas

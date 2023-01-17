@@ -134,7 +134,7 @@ class ProjectsRoute(APIRouter):
         from record r
         join satellite s on r.satellite_id = s.id
         join qualityflag q on r.quality_flag_id = q.id
-        join "version" v on r.version_id = v.id
+        left join "version" v on r.version_id = v.id
         where ST_Intersects(ST_MakeEnvelope({lon_min}, {lat_min}, {lon_max}, {lat_max}), r.point) {satellites_queries} {flags_queries} {timestamp_from_query} {timestamp_to_query} {time_interval_from}
         """
 
