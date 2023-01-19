@@ -61,9 +61,15 @@ def read_quality_flag(satellite_id, flag):
     return quality_flag
 
 
-def read_latest_satellite_record(satellite):
+def read_latest_satellite_record(satellite, offset=0, limit=1):
     with Session(engine) as session:
-        statement = select(models.Record).where(models.Record.satellite_id == satellite.id).order_by(models.Record.timestamp.desc())
+        statement = select(
+            models.Record
+        ).where(
+            models.Record.satellite_id == satellite.id
+        ).order_by(
+            models.Record.timestamp.desc()
+        ).offset(offset).limit(limit)
         record = session.exec(statement).first()
     return record
 
