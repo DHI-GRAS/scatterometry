@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query
 from typing import Union
 from uuid import uuid1
 
+import config
 
 from database import query_to_csv_stream, raw_query
 from cloud_storage import upload_to_cloud_storage
@@ -17,8 +18,8 @@ class ProjectsRoute(APIRouter):
         async def get_records(
             lat_max: float = 90,
             lat_min: float = -90,
-            lon_max: float = 180,
-            lon_min: float = -180,
+            lon_max: float = 360,
+            lon_min: float = 0,
             timestamp_from: Union[datetime, None] = None,
             timestamp_to: Union[datetime, None] = None,
             time_interval_from: str = None,
@@ -30,13 +31,13 @@ class ProjectsRoute(APIRouter):
                 flags, timestamp_from, timestamp_to, time_interval_from, count=True
             )
 
-            records_count = raw_query(query).one()[0]
+            total_records_count = raw_query(query).one()[0]
 
             response_payload = {
                 "status": "success",
                 "error": False,
                 "message": None,
-                "records_count": records_count
+                "total_records_count": total_records_count,
             }
 
             return response_payload
@@ -45,17 +46,27 @@ class ProjectsRoute(APIRouter):
         async def get_records(
             lat_max: float = 90,
             lat_min: float = -90,
-            lon_max: float = 180,
-            lon_min: float = -180,
+            lon_max: float = 360,
+            lon_min: float = 0,
             timestamp_from: Union[datetime, None] = None,
             timestamp_to: Union[datetime, None] = None,
             time_interval_from: str = None,
             satellites: Union[str, None] = Query(description="A comma separated list of the satellite names", default=None),
             flags: Union[str, None] = Query(description="A comma separated list of the quality flag names", default=None),
+            page: int = Query(description="The pagination index. The pagination starts from 1", default=1),
         ):
 
-            query = self.__query(lon_min, lat_min, lon_max, lat_max, satellites,
-                flags, timestamp_from, timestamp_to, time_interval_from, count=False
+            # Count all records for query
+            total_records_query = self.__query(lon_min, lat_min, lon_max, lat_max, satellites,
+                flags, timestamp_from, timestamp_to, time_interval_from, count=True
+            )
+            total_records_count = raw_query(total_records_query).one()[0]
+
+            # Collect the records of the page
+            if page < 1:
+                page = 1
+            query = self.__query(lon_min, lat_min, lon_max, lat_max, satellites, flags,
+                timestamp_from, timestamp_to, time_interval_from, page, count=False,
             )
 
             df, stream = query_to_csv_stream(query)
@@ -72,7 +83,8 @@ class ProjectsRoute(APIRouter):
                 "message": None,
                 "download_url": download_url,
                 "quota_used_bytes": quota_used_bytes,
-                "records_count": df.shape[0]
+                "current_records_count": df.shape[0],
+                "total_records_count": total_records_count,
             }
 
             return response_payload
@@ -115,7 +127,8 @@ class ProjectsRoute(APIRouter):
         timestamp_from,
         timestamp_to,
         time_interval_from,
-        count=False
+        page=None,
+        count=False,
     ):
 
         satellites_queries = self.__satellites_queries(satellites)
@@ -124,10 +137,14 @@ class ProjectsRoute(APIRouter):
         timestamp_to_query = self.__timestamp_to_query(timestamp_to)
         time_interval_from = self.__time_interval_from_query(time_interval_from)
 
+        limits = ""
+        order_by = ""
         if count is True:
             select = "count(*)"
         else:
             select = 's.name as satellite, ST_X(r.point) as longitude, ST_Y(r.point) as latitude, r."timestamp", r.wind_direction, r.wind_speed, q."name", v."name" as version'
+            order_by = 'order by r."timestamp" desc'
+            limits = f"limit {config.RECORDS_PER_PAGE} offset {page * config.RECORDS_PER_PAGE - config.RECORDS_PER_PAGE}"
 
         query = f"""
         select {select}
@@ -136,6 +153,8 @@ class ProjectsRoute(APIRouter):
         join qualityflag q on r.quality_flag_id = q.id
         left join "version" v on r.version_id = v.id
         where ST_Intersects(ST_MakeEnvelope({lon_min}, {lat_min}, {lon_max}, {lat_max}), r.point) {satellites_queries} {flags_queries} {timestamp_from_query} {timestamp_to_query} {time_interval_from}
+        {order_by}
+        {limits}
         """
 
         return query
