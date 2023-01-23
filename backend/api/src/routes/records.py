@@ -1,11 +1,12 @@
 from datetime import datetime
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from typing import Union
 from uuid import uuid1
 
 import config
 
 from database import query_to_csv_stream, raw_query
+from dependencies import authenticate
 from cloud_storage import upload_to_cloud_storage
 
 
@@ -25,6 +26,7 @@ class ProjectsRoute(APIRouter):
             time_interval_from: str = None,
             satellites: Union[str, None] = Query(description="A comma separated list of the satellite names", default=None),
             flags: Union[str, None] = Query(description="A comma separated list of the quality flag names", default=None),
+            user_uid : str = Depends(authenticate),
         ):
 
             query = self.__query(lon_min, lat_min, lon_max, lat_max, satellites,
@@ -54,6 +56,7 @@ class ProjectsRoute(APIRouter):
             satellites: Union[str, None] = Query(description="A comma separated list of the satellite names", default=None),
             flags: Union[str, None] = Query(description="A comma separated list of the quality flag names", default=None),
             page: int = Query(description="The pagination index. The pagination starts from 1", default=1),
+            user_uid : str = Depends(authenticate),
         ):
 
             # Count all records for query

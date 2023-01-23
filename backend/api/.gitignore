@@ -1,6 +1,8 @@
 venv
 env
+.venv
 .env
 __pycache__
 *.db
 ignr*
+local.settings.json

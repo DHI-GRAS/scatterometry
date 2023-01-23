@@ -1,6 +1,8 @@
-
+from fastapi import Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import sqlmodel
 
+from authentication import validate_token
 from database import engine
 
 
@@ -10,3 +12,10 @@ def db_conn():
             yield db
 
     return db
+
+
+def authenticate(
+    authorization: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
+) -> str:
+    uid = validate_token(authorization.credentials)
+    return uid
