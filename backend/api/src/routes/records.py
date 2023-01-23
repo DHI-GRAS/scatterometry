@@ -3,11 +3,11 @@ from fastapi import APIRouter, Query, Depends
 from typing import Union
 from uuid import uuid1
 
-import config
+import src.config as config
 
-from database import query_to_csv_stream, raw_query
-from dependencies import authenticate
-from cloud_storage import upload_to_cloud_storage
+from src.database import query_to_csv_stream, raw_query
+from src.dependencies import authenticate
+from src.cloud_storage import upload_to_cloud_storage
 
 
 class ProjectsRoute(APIRouter):

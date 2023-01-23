@@ -2,8 +2,8 @@ from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import sqlmodel
 
-from authentication import validate_token
-from database import engine
+from src.authentication import validate_token
+from src.database import engine
 
 
 def db_conn():
