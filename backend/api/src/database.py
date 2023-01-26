@@ -3,7 +3,7 @@ import pandas as pd
 
 from sqlmodel import create_engine
 
-import config
+import src.config as config
 
 
 engine = create_engine(config.DATABASE_URL, echo=False, future=False)

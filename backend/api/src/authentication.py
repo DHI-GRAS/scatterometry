@@ -4,7 +4,7 @@ import requests
 import fastapi
 from jose import jwt
 
-import config
+import src.config as config
 
 
 UserID = str

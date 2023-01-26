@@ -92,3 +92,51 @@ resource "azurerm_storage_container" "storage_container" {
   storage_account_name  = azurerm_storage_account.storage_account.name
   container_access_type = "blob"
 }
+
+
+# Azure function
+resource "azurerm_service_plan" "scatterometry_api" {
+  name                = "scatterometry-api"
+  location            = var.resources_location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  os_type             = "Linux"
+  sku_name            = "Y1"
+
+  tags = var.tags
+}
+
+resource "azurerm_linux_function_app" "scatterometry_api" {
+  name                    = "scatterometry-api"
+  location                = var.resources_location
+  resource_group_name     = azurerm_resource_group.resourcegroup.name
+  builtin_logging_enabled = true
+  client_certificate_mode = "Required"
+  https_only              = true
+
+  service_plan_id = azurerm_service_plan.scatterometry_api.id
+
+  storage_account_name       = azurerm_storage_account.storage_account.name
+  storage_account_access_key = azurerm_storage_account.storage_account.primary_access_key
+
+  tags = var.tags
+
+  site_config {
+    app_scale_limit = 200
+    always_on       = false
+    ftps_state      = "FtpsOnly"
+
+
+    application_stack {
+      python_version = "3.9"
+    }
+
+    cors {
+      allowed_origins     = ["https://portal.azure.com", ]
+      support_credentials = false
+    }
+  }
+}
+
+output "api_url" {
+  value = azurerm_linux_function_app.scatterometry_api.default_hostname
+}
