@@ -9,7 +9,7 @@ from os import makedirs
 from os.path import isdir, basename, splitext
 from urllib.error import HTTPError
 
-from database import read_satellite, read_latest_satellite_record
+from database import read_satellite, read_latest_satellite_record, read_earliest_satellite_record
 from subscriber import podaac_access as pa
 from ingestion import handle_file
 from utils import get_satellite_from_str
@@ -19,6 +19,7 @@ page_size = 2000
 
 
 def get_configuration(
+    mode,
     collection,
     output_directory,
     start_date,
@@ -27,6 +28,12 @@ def get_configuration(
     verbose,
     provider,
 ):
+
+    configurations_func_map = {
+        "get": get_mode_configuration,
+        "update": update_mode_configuration,
+    }
+
     args = argparse.Namespace(
         collection=collection,
         output_directory=output_directory,
@@ -39,6 +46,11 @@ def get_configuration(
 
     args.satellite_name = get_satellite_from_str(args.collection)
 
+    return configurations_func_map[mode](args)
+
+
+def get_mode_configuration(args):
+
     if not args.start_date:
         satellite = read_satellite(args.satellite_name)
         latest_record = read_latest_satellite_record(satellite)
@@ -46,6 +58,22 @@ def get_configuration(
 
     if not args.end_date:
         args.end_date = datetime.now().isoformat()
+
+    return args
+
+
+def update_mode_configuration(args):
+
+    if not args.start_date or not args.end_date:
+        satellite = read_satellite(args.satellite_name)
+
+    if not args.start_date:
+        earliest_record = read_earliest_satellite_record(satellite)
+        args.start_date = earliest_record.timestamp.strftime('%Y-%m-%dT%H:%M:%S')
+
+    if not args.end_date:
+        latest_record = read_latest_satellite_record(satellite)
+        args.end_date = latest_record.timestamp.strftime('%Y-%m-%dT%H:%M:%S')
 
     return args
 
@@ -150,6 +178,13 @@ def run(args):
 
 @click.command()
 @click.option(
+    "--mode",
+    "mode",
+    required=True,
+    default="get",
+    help="The downloading-ingestion mode. Options are: get, update. In get mode only new data are ingested. In update mode the existing data get updated.",
+)
+@click.option(
     "-c",
     "--collections-shortnames",
     "collections",
@@ -199,6 +234,7 @@ def run(args):
     help="Specify a provider for collection search. Default is POCLOUD."
 )
 def main(
+    mode,
     collections,
     output_directory,
     start_date,
@@ -216,6 +252,7 @@ def main(
     for collection in collections.split(','):
         try:
             args = get_configuration(
+                mode,
                 collection,
                 output_directory=output_directory,
                 start_date=start_date,
@@ -227,7 +264,6 @@ def main(
             run(args)
         except Exception as e:
             logging.exception("Uncaught exception occurred during execution.")
-            exit(hash(e))
 
 if __name__ == '__main__':
     main()

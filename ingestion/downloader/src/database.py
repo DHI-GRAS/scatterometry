@@ -74,6 +74,19 @@ def read_latest_satellite_record(satellite, offset=0, limit=1):
     return record
 
 
+def read_earliest_satellite_record(satellite, offset=0, limit=1):
+    with Session(engine) as session:
+        statement = select(
+            models.Record
+        ).where(
+            models.Record.satellite_id == satellite.id
+        ).order_by(
+            models.Record.timestamp.asc()
+        ).offset(offset).limit(limit)
+        record = session.exec(statement).first()
+    return record
+
+
 def write_records_from_data_frame(data_frame):
     data_frame.to_sql(
         models.Record.__table__.name,
