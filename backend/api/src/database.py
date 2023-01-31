@@ -1,12 +1,11 @@
 import io
 import pandas as pd
+import sqlmodel
 
-from sqlmodel import create_engine
-
-import src.config as config
+from src import config
 
 
-engine = create_engine(config.DATABASE_URL, echo=False, future=False)
+engine = sqlmodel.create_engine(config.DATABASE_URL, echo=False, future=False)
 
 
 def raw_query(query):

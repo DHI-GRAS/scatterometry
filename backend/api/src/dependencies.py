@@ -1,15 +1,16 @@
+import sqlmodel
+
 from fastapi import Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.exceptions import HTTPException
-import sqlmodel
 
 from src import authentication
-from src.database import engine
+from src import database
 
 
 def db_conn():
     def db():
-        with sqlmodel.Session(engine) as db:
+        with sqlmodel.Session(database.engine) as db:
             yield db
 
     return db

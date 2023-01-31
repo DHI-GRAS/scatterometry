@@ -1,6 +1,6 @@
 from azure.storage.blob import BlobServiceClient
 
-import src.config as config
+from src import config
 
 
 blob_service_client = BlobServiceClient.from_connection_string(config.AZURE_STORAGE_CONNECTION_STRING)

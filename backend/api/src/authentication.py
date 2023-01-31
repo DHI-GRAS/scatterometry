@@ -1,4 +1,4 @@
-import src.config as config
+from src import config
 
 
 def is_access_key_valid(access_key: str) -> bool:
