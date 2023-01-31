@@ -31,9 +31,13 @@ terraform apply terraform.out
 ### Deploy the azure function
 * [Optional] Set the variable `export CLI_DEBUG=1` to make the deployment process verbose
 * Go to `./api`
-* Run `func azure functionapp publish scatterometry-api --publish-local-settings`
+* Make sure that the environment variables needed by the function are filled in the portal
+* Make sure that the `ACCESS_KEYS` variable has the expected user keys
+* Run `func azure functionapp publish scatterometry-api`
 
-*Note:* The function app name `scatterometry-api` is hardcoded in the terraform azure function configuration block.
+*Notes:*
+* The function app name `scatterometry-api` is hardcoded in the terraform azure function configuration block.
+* Run `func azure functionapp publish scatterometry-api --publish-local-settings` to publish the local environment variables and overwrite the ones in portal
 
 ## Create and apply migrations
 Create migrations with:
@@ -45,3 +49,7 @@ Apply migrations with:
 ```
 alembic upgrade head
 ```
+
+
+## Make a request
+* To connect to the API one needs an access key. The access key is provided with the `Authentication: <key>` header

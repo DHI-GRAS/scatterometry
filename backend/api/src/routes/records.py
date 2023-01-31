@@ -26,7 +26,7 @@ class ProjectsRoute(APIRouter):
             time_interval_from: str = None,
             satellites: Union[str, None] = Query(description="A comma separated list of the satellite names", default=None),
             flags: Union[str, None] = Query(description="A comma separated list of the quality flag names", default=None),
-            user_uid : str = Depends(authenticate),
+            is_authenticated : str = Depends(authenticate),
         ):
 
             query = self.__query(lon_min, lat_min, lon_max, lat_max, satellites,
@@ -56,7 +56,7 @@ class ProjectsRoute(APIRouter):
             satellites: Union[str, None] = Query(description="A comma separated list of the satellite names", default=None),
             flags: Union[str, None] = Query(description="A comma separated list of the quality flag names", default=None),
             page: int = Query(description="The pagination index. The pagination starts from 1", default=1),
-            user_uid : str = Depends(authenticate),
+            is_authenticated : str = Depends(authenticate),
         ):
 
             # Count all records for query

@@ -5,8 +5,6 @@
     "DATABASE_URL": "postgresql://<database server url>/<database>?user=<username>&password=<password>",
     "AZURE_STORAGE_CONNECTION_STRING": "<connection string>",
     "AZURE_STORAGE_BLOB_CONTAINER": "queryresults",
-    "AUTH0_ISSUER": "https://dhigras.eu.auth0.com/",
-    "AUTH0_AUDIENCE": "<identifier aka audience>",
-    "AUTH0_ALGORITHMS": "RS256"
+    "ACCESS_KEYS": "<comma separated list of API access keys>"
   }
 }

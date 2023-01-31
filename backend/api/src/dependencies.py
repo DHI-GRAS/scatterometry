@@ -1,8 +1,9 @@
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.exceptions import HTTPException
 import sqlmodel
 
-from src.authentication import validate_token
+from src import authentication
 from src.database import engine
 
 
@@ -14,8 +15,13 @@ def db_conn():
     return db
 
 
-def authenticate(
-    authorization: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
-) -> str:
-    uid = validate_token(authorization.credentials)
-    return uid
+def authenticate(req: Request) -> bool:
+
+    access_key = req.headers.get("Authorization")
+    if not access_key:
+        raise HTTPException(status_code=403)
+
+    if authentication.is_access_key_valid(access_key):
+        return True
+
+    raise HTTPException(status_code=401)
