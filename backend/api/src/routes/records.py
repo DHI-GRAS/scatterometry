@@ -1,6 +1,8 @@
 import pydantic
+import geoalchemy2
+import sqlalchemy
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Query, Depends
 from typing import Union
 from uuid import uuid1
@@ -38,7 +40,6 @@ class GetRecordsUrlParams(RecordsUrlParams):
     @pydantic.validator("lon_min")
     def spatial_area(cls, v, values):
         area = (values["lon_max"] - v) * (values["lat_max"] - values["lat_min"])
-        print(area)
         if area > config.MAX_AREA_DEGREES:
             raise ValueError(
                 f"Spatial area can not be greater than {config.MAX_AREA_DEGREES} square degrees"
@@ -91,9 +92,13 @@ class ProjectsRoute(APIRouter):
             is_authenticated: str = Depends(dependencies.authenticate),
         ):
 
-            query = self.__query(url_params, count=True)
+            query = self.__query(url_params)
 
-            data = {"total_records_count": database.raw_query(query).one()[0]}
+            data = {
+                "total_records_count": query.with_entities(
+                    sqlalchemy.func.count()
+                ).scalar()
+            }
 
             return responses.build_response(data=data)
 
@@ -103,9 +108,14 @@ class ProjectsRoute(APIRouter):
             is_authenticated: str = Depends(dependencies.authenticate),
         ):
 
-            query = self.__query(
+            sqlalchemy_query = self.__query(
                 url_params,
-                count=False,
+            )
+            query = str(
+                sqlalchemy_query.statement.compile(
+                    dialect=sqlalchemy.dialects.postgresql.dialect(),
+                    compile_kwargs={"literal_binds": True},
+                )
             )
 
             df, stream = database.query_to_csv_stream(query)
@@ -128,62 +138,81 @@ class ProjectsRoute(APIRouter):
 
     def __satellites_queries(self, satellites):
         if not satellites:
-            return ""
+            return None
         satellites = ",".join(
             [f"'{satellite.strip()}'" for satellite in satellites.split(",")]
         )
-        return f'and s."name" in ({satellites})'
+        return models.Satellite.name.in_(satellites)
 
     def __flags_queries(self, flags):
         if not flags:
-            return ""
+            return None
         flags = ",".join([f"'{flag.strip()}'" for flag in flags.split(",")])
-        return f"and q.name in ({flags})"
+        return models.QualityFlag.name.in_(flags)
 
     def __timestamp_from_query(self, timestamp_from):
         if not timestamp_from:
-            return ""
-        return f"""and r."timestamp" >= '{timestamp_from}'"""
+            return None
+        return models.Record.timestamp >= timestamp_from.isoformat()
 
     def __timestamp_to_query(self, timestamp_to):
         if not timestamp_to:
-            return ""
-        return f"""and r."timestamp" <= '{timestamp_to}'"""
+            return None
+        return models.Record.timestamp <= timestamp_to.isoformat()
 
     def __time_interval_from_hours_query(self, time_interval_from_hours):
         if not time_interval_from_hours:
-            return ""
-        return f"""and r."timestamp" >= NOW() - INTERVAL '{time_interval_from_hours} HOURS'"""
+            return None
+        return (
+            models.Record.timestamp
+            >= (datetime.now() - timedelta(hours=time_interval_from_hours)).isoformat()
+        )
 
     def __query(
         self,
         url_params,
-        count=False,
     ):
 
-        satellites_queries = self.__satellites_queries(url_params.satellites)
-        flags_queries = self.__flags_queries(url_params.flags)
-        timestamp_from_query = self.__timestamp_from_query(url_params.timestamp_from)
-        timestamp_to_query = self.__timestamp_to_query(url_params.timestamp_to)
-        time_interval_from_hours_query = self.__time_interval_from_hours_query(
-            url_params.time_interval_from_hours
-        )
+        query_filters = [
+            self.__satellites_queries(url_params.satellites),
+            self.__flags_queries(url_params.flags),
+            self.__timestamp_from_query(url_params.timestamp_from),
+            self.__timestamp_to_query(url_params.timestamp_to),
+            self.__time_interval_from_hours_query(url_params.time_interval_from_hours),
+        ]
 
-        order_by = ""
-        if count is True:
-            select = "count(*)"
-        else:
-            select = 's.name as satellite, ST_X(r.point) as longitude, ST_Y(r.point) as latitude, r."timestamp", r.wind_direction, r.wind_speed, q."name", v."name" as version'
-            order_by = 'order by r."timestamp" desc'
+        with database.Session() as session:
 
-        query = f"""
-        select {select}
-        from record r
-        join satellite s on r.satellite_id = s.id
-        join qualityflag q on r.quality_flag_id = q.id
-        left join "version" v on r.version_id = v.id
-        where ST_Intersects(ST_MakeEnvelope({url_params.lon_min}, {url_params.lat_min}, {url_params.lon_max}, {url_params.lat_max}), r.point) {satellites_queries} {flags_queries} {timestamp_from_query} {timestamp_to_query} {time_interval_from_hours_query}
-        {order_by}
-        """
+            query = (
+                session.query(
+                    models.Satellite.name.label("satellite"),
+                    geoalchemy2.func.st_x(models.Record.point).label("longitude"),
+                    geoalchemy2.func.st_y(models.Record.point).label("latitude"),
+                    models.Record.timestamp.label("timestamp"),
+                    models.Record.wind_direction,
+                    models.Record.wind_speed,
+                    models.QualityFlag.name.label("quality_flag"),
+                    models.Version.name.label("version"),
+                )
+                .join(
+                    models.Record.satellite,
+                    models.Record.quality_flag,
+                )
+                .join(
+                    models.Record.version,
+                    isouter=True,
+                )
+                .filter(
+                    models.Record.point.intersects(
+                        geoalchemy2.func.ST_MakeEnvelope(
+                            url_params.lon_min,
+                            url_params.lat_min,
+                            url_params.lon_max,
+                            url_params.lat_max,
+                        ),
+                    ),
+                    *[qf for qf in query_filters if qf is not None],
+                )
+            )
 
         return query

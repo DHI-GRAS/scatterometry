@@ -1,11 +1,14 @@
 import io
 import pandas as pd
+import sqlalchemy
 import sqlmodel
 
 from src import config
 
 
 engine = sqlmodel.create_engine(config.DATABASE_URL, echo=False, future=False)
+
+Session = sqlalchemy.orm.sessionmaker(bind=engine)
 
 
 def raw_query(query):
