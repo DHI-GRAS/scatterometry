@@ -53,6 +53,6 @@ setup(
         "starlette==0.22.0",
         "typing_extensions==4.4.0",
         "urllib3==1.26.14",
-        "uvicorn==0.20.0"
+        "uvicorn==0.20.0",
     ],
 )

@@ -20,9 +20,4 @@ def build_response(status=None, errors=None, message=None, data=None):
     if status is None:
         status = Statuses.failure if errors else Statuses.success
 
-    return BasicResponse(
-        status=status,
-        errors=errors,
-        message=message,
-        data=data
-    )
+    return BasicResponse(status=status, errors=errors, message=message, data=data)

@@ -14,8 +14,17 @@ def format_df(df, record_file: models.RecordFile, satellite: models.Satellite):
     """
 
     nullable_columns = ["version_id", "wind_direction", "wind_speed"]
-    pk_subset = ["point", "timestamp", "quality_flag_id", "satellite_id", "record_file_id"]
-    quality_flags = {quality_flag.flag: quality_flag.id for quality_flag in database.read_quality_flags(satellite_id=satellite.id)}
+    pk_subset = [
+        "point",
+        "timestamp",
+        "quality_flag_id",
+        "satellite_id",
+        "record_file_id",
+    ]
+    quality_flags = {
+        quality_flag.flag: quality_flag.id
+        for quality_flag in database.read_quality_flags(satellite_id=satellite.id)
+    }
 
     for column in nullable_columns:
         if column not in df.columns:
@@ -34,9 +43,9 @@ def format_df(df, record_file: models.RecordFile, satellite: models.Satellite):
             f"Found {duplicates.sum()} duplicate rows for columns combination "
             "point, timestamp, quality_flag_id, satellite_id, record_file_id.\n"
             "Dropping duplicates:\n",
-            df[duplicates]
+            df[duplicates],
         )
         logging.warning(msg)
-        df = df.drop_duplicates(subset=pk_subset, keep='last')
+        df = df.drop_duplicates(subset=pk_subset, keep="last")
 
     return df

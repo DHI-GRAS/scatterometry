@@ -28,7 +28,7 @@ class Satellite(SQLModel, table=True):
     records: List["Record"] = Relationship(back_populates="satellite")
 
     __table_args__ = (
-        UniqueConstraint('mission_id', 'name', name='mission_id_name_uc'),
+        UniqueConstraint("mission_id", "name", name="mission_id_name_uc"),
     )
 
 
@@ -42,7 +42,7 @@ class Version(SQLModel, table=True):
     records: List["Record"] = Relationship(back_populates="version")
 
     __table_args__ = (
-        UniqueConstraint('satellite_id', 'name', name='satellite_id_name_uc'),
+        UniqueConstraint("satellite_id", "name", name="satellite_id_name_uc"),
     )
 
 
@@ -57,7 +57,7 @@ class QualityFlag(SQLModel, table=True):
     records: List["Record"] = Relationship(back_populates="quality_flag")
 
     __table_args__ = (
-        UniqueConstraint('satellite_id', 'flag', name='satellite_id_flag_uc'),
+        UniqueConstraint("satellite_id", "flag", name="satellite_id_flag_uc"),
     )
 
 
@@ -76,15 +76,23 @@ class Record(SQLModel, table=True):
     # Here many columns are assigned as candidate keys with `primary_key=True` and together they are identifying a unique item
     # Ref: https://docs.sqlalchemy.org/en/14/core/constraints.html
     # Later when the the table is converted to hyper-table timescale db will handle the features of primary keys
-    point: Any = Field(sa_column=Column(Geometry('POINT')), index=True, primary_key=True)
+    point: Any = Field(
+        sa_column=Column(Geometry("POINT")), index=True, primary_key=True
+    )
     timestamp: datetime = Field(primary_key=True)
     wind_direction: Optional[float]
     wind_speed: Optional[float]
-    quality_flag_id: int = Field(index=True, foreign_key="qualityflag.id", primary_key=True)
+    quality_flag_id: int = Field(
+        index=True, foreign_key="qualityflag.id", primary_key=True
+    )
     quality_flag: QualityFlag = Relationship(back_populates="records")
-    version_id: int = Field(index=True, foreign_key="version.id", default=None, nullable=True)
+    version_id: int = Field(
+        index=True, foreign_key="version.id", default=None, nullable=True
+    )
     version: Version = Relationship(back_populates="records")
     satellite_id: int = Field(index=True, foreign_key="satellite.id", primary_key=True)
     satellite: Satellite = Relationship(back_populates="records")
-    record_file_id: int = Field(index=True, foreign_key="recordfile.id", primary_key=True)
+    record_file_id: int = Field(
+        index=True, foreign_key="recordfile.id", primary_key=True
+    )
     record_file: RecordFile = Relationship(back_populates="records")

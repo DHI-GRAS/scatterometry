@@ -9,7 +9,11 @@ from os import makedirs
 from os.path import isdir, basename, splitext
 from urllib.error import HTTPError
 
-from database import read_satellite, read_latest_satellite_record, read_earliest_satellite_record
+from database import (
+    read_satellite,
+    read_latest_satellite_record,
+    read_earliest_satellite_record,
+)
 from subscriber import podaac_access as pa
 from ingestion import handle_file
 from utils import get_satellite_from_str
@@ -54,7 +58,11 @@ def get_mode_configuration(args):
     if not args.start_date:
         satellite = read_satellite(args.satellite_name)
         latest_record = read_latest_satellite_record(satellite)
-        args.start_date = latest_record.timestamp.strftime('%Y-%m-%dT%H:%M:%S') if latest_record else "1900-01-01"
+        args.start_date = (
+            latest_record.timestamp.strftime("%Y-%m-%dT%H:%M:%S")
+            if latest_record
+            else "1900-01-01"
+        )
 
     if not args.end_date:
         args.end_date = datetime.now().isoformat()
@@ -69,11 +77,11 @@ def update_mode_configuration(args):
 
     if not args.start_date:
         earliest_record = read_earliest_satellite_record(satellite)
-        args.start_date = earliest_record.timestamp.strftime('%Y-%m-%dT%H:%M:%S')
+        args.start_date = earliest_record.timestamp.strftime("%Y-%m-%dT%H:%M:%S")
 
     if not args.end_date:
         latest_record = read_latest_satellite_record(satellite)
-        args.end_date = latest_record.timestamp.strftime('%Y-%m-%dT%H:%M:%S')
+        args.end_date = latest_record.timestamp.strftime("%Y-%m-%dT%H:%M:%S")
 
     return args
 
@@ -82,26 +90,28 @@ def prepare(args, token):
 
     # This cell will replace the timestamp above with the one read from the `.update` file in the data directory, if it exists.
     if not isdir(args.output_directory):
-        logging.info("NOTE: Making new data directory at " + args.output_directory + "(This is the first run.)")
+        logging.info(
+            "NOTE: Making new data directory at "
+            + args.output_directory
+            + "(This is the first run.)"
+        )
         makedirs(args.output_directory, exist_ok=True)
 
     temporal_range = pa.get_temporal_range(
-        args.start_date,
-        args.end_date,
-        datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        args.start_date, args.end_date, datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     )
 
     params = [
-        ('page_size', page_size),
-        ('sort_key', "-start_date"),
-        ('provider', args.provider),
-        ('ShortName', args.collection),
-        ('temporal', temporal_range),
-        ('token', token),
+        ("page_size", page_size),
+        ("sort_key", "-start_date"),
+        ("provider", args.provider),
+        ("ShortName", args.collection),
+        ("temporal", temporal_range),
+        ("token", token),
     ]
 
     if args.bbox is not None:
-        params.append(('bounding_box', args.bbox))
+        params.append(("bounding_box", args.bbox))
 
     return params
 
@@ -117,7 +127,7 @@ def get_results(params, args, token):
             if e.code != 401:
                 raise e
             token = pa.refresh_token(token)
-            for  i, p in enumerate(params):
+            for i, p in enumerate(params):
                 if p[1] == "token":
                     params[i] = ("token", token)
     else:
@@ -132,9 +142,15 @@ def get_files_to_download(results):
     for item in results["items"]:
 
         for related_url in item["umm"]["RelatedUrls"]:
-            if (related_url["Type"] == "EXTENDED METADATA") or ((related_url["Type"] == "GET DATA") and (('Subtype' not in related_url) or (related_url['Subtype'] != "OPENDAP DATA"))):
-                if splitext(related_url['URL'])[-1] in pa.extensions:
-                    urls.append((basename(related_url['URL']), related_url['URL']))
+            if (related_url["Type"] == "EXTENDED METADATA") or (
+                (related_url["Type"] == "GET DATA")
+                and (
+                    ("Subtype" not in related_url)
+                    or (related_url["Subtype"] != "OPENDAP DATA")
+                )
+            ):
+                if splitext(related_url["URL"])[-1] in pa.extensions:
+                    urls.append((basename(related_url["URL"]), related_url["URL"]))
 
         for granule in item["umm"]["DataGranule"]["ArchiveAndDistributionInformation"]:
             if splitext(granule["Name"])[-1] in pa.extensions:
@@ -149,14 +165,18 @@ def get_files_to_download(results):
             del checksums[filename]
 
     if len(urls) != 0 or len(checksums) != 0:
-        raise Exception(f"There are residual items:\nurls: {urls}\nchecksums: {checksums}")
+        raise Exception(
+            f"There are residual items:\nurls: {urls}\nchecksums: {checksums}"
+        )
 
     return downloads
 
 
 def run(args):
 
-    logging.info(f"Ingesting data for satellite {args.satellite_name} from {args.start_date} to {args.end_date}")
+    logging.info(
+        f"Ingesting data for satellite {args.satellite_name} from {args.start_date} to {args.end_date}"
+    )
 
     pa.setup_earthdata_login_auth(pa.edl)
     token = pa.get_token(pa.token_url)
@@ -189,7 +209,7 @@ def run(args):
     "--collections-shortnames",
     "collections",
     required=True,
-    help="A list of collections shortnames for which you want to retrieve data."
+    help="A list of collections shortnames for which you want to retrieve data.",
 )
 @click.option(
     "-d",
@@ -197,41 +217,36 @@ def run(args):
     "output_directory",
     required=False,
     default="./temp",
-    help="The directory where data products will be downloaded."
+    help="The directory where data products will be downloaded.",
 )
 @click.option(
     "-sd",
     "--start-date",
     "start_date",
     required=False,
-    help="The ISO date time after which data should be retrieved. For Example, --start-date 2021-01-14T00:00:00Z"
+    help="The ISO date time after which data should be retrieved. For Example, --start-date 2021-01-14T00:00:00Z",
 )
 @click.option(
     "-ed",
     "--end-date",
     "end_date",
     required=False,
-    help="The ISO date time before which data should be retrieved. For Example, --end-date 2021-01-14T00:00:00Z"
+    help="The ISO date time before which data should be retrieved. For Example, --end-date 2021-01-14T00:00:00Z",
 )
 @click.option(
     "-b",
     "--bounds",
     "bbox",
     default=None,
-    help="The bounding rectangle to filter result in. Format is W Longitude,S Latitude,E Longitude,N Latitude without spaces. Due to an issue with parsing arguments, to use this command, please use the -b=\"-180,-90,180,90\" syntax when calling from the command line. Default: \"-180,-90,180,90\".",
+    help='The bounding rectangle to filter result in. Format is W Longitude,S Latitude,E Longitude,N Latitude without spaces. Due to an issue with parsing arguments, to use this command, please use the -b="-180,-90,180,90" syntax when calling from the command line. Default: "-180,-90,180,90".',
 )
-@click.option(
-    "--verbose",
-    "verbose",
-    is_flag=True,
-    help="Verbose mode."
-)
+@click.option("--verbose", "verbose", is_flag=True, help="Verbose mode.")
 @click.option(
     "-p",
     "--provider",
     "provider",
-    default='POCLOUD',
-    help="Specify a provider for collection search. Default is POCLOUD."
+    default="POCLOUD",
+    help="Specify a provider for collection search. Default is POCLOUD.",
 )
 def main(
     mode,
@@ -243,13 +258,15 @@ def main(
     verbose,
     provider,
 ):
-    log_level = os.environ.get('PODAAC_LOGLEVEL', 'INFO').upper()
-    logging.basicConfig(stream=sys.stdout,
-                        format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
-                        level=log_level)
+    log_level = os.environ.get("PODAAC_LOGLEVEL", "INFO").upper()
+    logging.basicConfig(
+        stream=sys.stdout,
+        format="[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
+        level=log_level,
+    )
     logging.debug("Log level set to " + log_level)
 
-    for collection in collections.split(','):
+    for collection in collections.split(","):
         try:
             args = get_configuration(
                 mode,
@@ -265,5 +282,6 @@ def main(
         except Exception as e:
             logging.exception("Uncaught exception occurred during execution.")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -20,12 +20,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.exception_handler(ValidationError)
 async def unicorn_exception_handler(request: Request, exc: ValidationError):
-    errors = [error['msg'] for error in exc.errors()]
+    errors = [error["msg"] for error in exc.errors()]
     return JSONResponse(
         content=jsonable_encoder(responses.build_response(errors=errors)),
-        status_code=400
+        status_code=400,
     )
+
 
 app.include_router(records.ProjectsRoute())

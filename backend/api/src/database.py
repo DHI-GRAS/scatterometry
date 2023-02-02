@@ -19,10 +19,14 @@ def query_to_df(query):
         yield chunk
 
 
-def query_to_csv_stream(query, index=False, header=True, sep=",", quotechar='"', no_data=None):
+def query_to_csv_stream(
+    query, index=False, header=True, sep=",", quotechar='"', no_data=None
+):
     stream = io.StringIO()
     df = pd.DataFrame()
     for chunk in query_to_df(query):
         df = pd.concat([df, chunk], ignore_index=True)
-    df.to_csv(stream, index=index, header=header, sep=sep, quotechar=quotechar, na_rep=no_data)
+    df.to_csv(
+        stream, index=index, header=header, sep=sep, quotechar=quotechar, na_rep=no_data
+    )
     return df, stream
