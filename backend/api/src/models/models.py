@@ -77,22 +77,25 @@ class Record(SQLModel, table=True):
     # Ref: https://docs.sqlalchemy.org/en/14/core/constraints.html
     # Later when the the table is converted to hyper-table timescale db will handle the features of primary keys
     point: Any = Field(
-        sa_column=Column(Geometry("POINT")), index=True, primary_key=True
+        sa_column=Column(Geometry("POINT")),
+        index=True,
+        primary_key=True,
+        nullable=False,
     )
     timestamp: datetime = Field(primary_key=True)
     wind_direction: Optional[float]
     wind_speed: Optional[float]
     quality_flag_id: int = Field(
-        index=True, foreign_key="qualityflag.id", primary_key=True
+        index=False, foreign_key="qualityflag.id", primary_key=True
     )
     quality_flag: QualityFlag = Relationship(back_populates="records")
     version_id: int = Field(
-        index=True, foreign_key="version.id", default=None, nullable=True
+        index=False, foreign_key="version.id", default=None, nullable=True
     )
     version: Version = Relationship(back_populates="records")
-    satellite_id: int = Field(index=True, foreign_key="satellite.id", primary_key=True)
+    satellite_id: int = Field(index=False, foreign_key="satellite.id", primary_key=True)
     satellite: Satellite = Relationship(back_populates="records")
     record_file_id: int = Field(
-        index=True, foreign_key="recordfile.id", primary_key=True
+        index=False, foreign_key="recordfile.id", primary_key=True
     )
     record_file: RecordFile = Relationship(back_populates="records")

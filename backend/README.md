@@ -40,14 +40,14 @@ terraform apply terraform.out
 * Run `func azure functionapp publish scatterometry-api --publish-local-settings` to publish the local environment variables and overwrite the ones in portal
 
 ## Create and apply migrations
-Create migrations with:
+Create migrations with and always check if they are as intended:
 ```
-alembic revision --autogenerate -m "<your message>"
+alembic -c src/alembic.ini revision --autogenerate -m "<your message>"
 ```
 
 Apply migrations with:
 ```
-alembic upgrade head
+alembic -c src/alembic.ini upgrade head
 ```
 
 

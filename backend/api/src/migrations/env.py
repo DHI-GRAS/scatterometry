@@ -4,8 +4,8 @@ from sqlmodel import SQLModel
 
 from alembic import context
 
-from database import engine
-from models import *
+from src.database import engine
+from src.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -31,7 +31,12 @@ target_metadata = SQLModel.metadata
 
 def include_object(object, name, type_, reflected, compare_to):
     if type_ == "table":
-        print("Table name:", name, ". Is being included in the migration: ", name in SQLModel.metadata.tables.keys())
+        print(
+            "Table name:",
+            name,
+            ". Is being included in the migration: ",
+            name in SQLModel.metadata.tables.keys(),
+        )
         return name in SQLModel.metadata.tables.keys()
     return True
 
