@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-import click
 import argparse
+import click
 import logging
 import os
 import sys
+import traceback
+
 from datetime import datetime
 from os import makedirs
 from os.path import isdir, basename, splitext
@@ -266,6 +268,7 @@ def main(
     )
     logging.debug("Log level set to " + log_level)
 
+    errors = []
     for collection in collections.split(","):
         try:
             args = get_configuration(
@@ -279,8 +282,14 @@ def main(
                 provider=provider,
             )
             run(args)
-        except Exception as e:
+        except Exception as ex:
+            errors.append(ex)
             logging.exception("Uncaught exception occurred during execution.")
+
+    if errors:
+        for error in errors:
+            traceback.print_exception(error)
+        raise Exception(f"Encountered {len(errors)} errors: {errors}")
 
 
 if __name__ == "__main__":
