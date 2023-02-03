@@ -1,11 +1,14 @@
+import os
+
 from logging.config import fileConfig
 
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, create_engine
 
 from alembic import context
 
-from src.database import engine
-from src.models import *
+from scatterometry_database.models import *
+
+engine = create_engine(os.environ["DATABASE_URL"], echo=False, future=False)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

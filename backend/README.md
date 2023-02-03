@@ -39,17 +39,6 @@ terraform apply terraform.out
 * The function app name `scatterometry-api` is hardcoded in the terraform azure function configuration block.
 * Run `func azure functionapp publish scatterometry-api --publish-local-settings` to publish the local environment variables and overwrite the ones in portal
 
-## Create and apply migrations
-Create migrations with and always check if they are as intended:
-```
-alembic -c src/alembic.ini revision --autogenerate -m "<your message>"
-```
-
-Apply migrations with:
-```
-alembic -c src/alembic.ini upgrade head
-```
-
 
 ## Make a request
 * To connect to the API one needs an access key. The access key is provided with the `Authentication: <key>` header

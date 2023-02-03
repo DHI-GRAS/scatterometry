@@ -3,9 +3,9 @@ import sqlalchemy
 
 from datetime import datetime, timedelta
 
+from scatterometry_database import models
 from src import (
     database,
-    models,
 )
 
 

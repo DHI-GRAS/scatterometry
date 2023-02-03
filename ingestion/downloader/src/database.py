@@ -3,7 +3,7 @@ from psycopg2.extensions import register_adapter, AsIs
 from shapely.geometry.point import Point
 from sqlmodel import create_engine, Session, select
 
-import models
+from scatterometry_database import models
 
 
 # DATABASE

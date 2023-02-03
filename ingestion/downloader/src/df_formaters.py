@@ -1,7 +1,8 @@
 import database
 import logging
-import models
 import geopandas as geopd
+
+from scatterometry_database import models
 
 
 # satellite = database.read_satellite(satellite_name="rscat")
