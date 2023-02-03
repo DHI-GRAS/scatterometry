@@ -70,7 +70,7 @@ if __name__ == "__main__":
         mode = prefect.Parameter("mode", default="update")
         collections = prefect.Parameter(
             "collections-shortnames",
-            default="ASCATA-L2-Coastal,ASCATA_L2_COASTAL_CDR,ASCATB-L2-Coastal,ASCATC-L2-Coastal,CYGNSS_L2_V3.1,OS2_OSCAT_LEVEL_2B_OWV_COMP_12_V2,QSCAT_LEVEL_2B_OWV_COMP_12_KUSST_LCRES_4.1,RSCAT_LEVEL_2B_OWV_CLIM_12_V2",
+            default="ASCATA-L2-Coastal,ASCATB-L2-Coastal,ASCATC-L2-Coastal,CYGNSS_L2_V3.1,OS2_OSCAT_LEVEL_2B_OWV_COMP_12_V2,QSCAT_LEVEL_2B_OWV_COMP_12_KUSST_LCRES_4.1,RSCAT_LEVEL_2B_OWV_CLIM_12_V2",
         )
         start_timestamp = prefect.Parameter("start-timestamp", default=None)
         end_timestamp = prefect.Parameter("end-timestamp", default=None)

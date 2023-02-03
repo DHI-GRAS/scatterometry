@@ -31,7 +31,6 @@ docker run --rm \
 Available collections:
 * ascat
     * ASCATA-L2-Coastal
-    * ASCATA_L2_COASTAL_CDR
     * ASCATB-L2-Coastal
     * ASCATC-L2-Coastal
 * cygnss
