@@ -26,6 +26,10 @@ terraform apply terraform.out
 * Run `func start --python`
 
 
+### Run tests
+* Go to `./api`
+* Run `python -m pytest src/tests/`
+
 ## Deploy the API
 
 ### Deploy the azure function

@@ -4,8 +4,10 @@ azure-identity
 azure-storage-blob
 fastapi
 GeoAlchemy2
+httpx
 pandas
 psycopg2-binary
+pytest
 shapely
 sqlmodel
 uvicorn

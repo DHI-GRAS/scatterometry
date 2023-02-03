@@ -1,11 +1,12 @@
 import pydantic
 
+from typing import Optional
 from .base import BasicResponse
 
 
 class GetRecordsData(pydantic.BaseModel):
-    download_url: pydantic.HttpUrl
-    quota_used_bytes: int
+    download_url: Optional[pydantic.HttpUrl]
+    quota_used_bytes: Optional[int]
     total_records_count: int
 
 

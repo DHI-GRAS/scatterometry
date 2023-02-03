@@ -1,6 +1,3 @@
-import geoalchemy2
-import sqlalchemy
-
 from fastapi import APIRouter, Depends
 from uuid import uuid1
 

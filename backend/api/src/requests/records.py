@@ -8,14 +8,13 @@ from src import config
 
 
 class RecordsUrlParams(pydantic.BaseModel):
-
     lat_max: float = 90
     lat_min: float = -90
     lon_max: float = 360
     lon_min: float = 0
     timestamp_to: Union[datetime, None] = None
     timestamp_from: Union[datetime, None] = None
-    time_interval_from_hours: int = None
+    time_interval_from_hours: pydantic.types.PositiveFloat = None
     satellites: Union[str, None] = pydantic.Field(
         Query(description="A comma separated list of the satellite names", default=None)
     )
@@ -27,7 +26,6 @@ class RecordsUrlParams(pydantic.BaseModel):
 
     @pydantic.validator("time_interval_from_hours")
     def temporal_logical_restrictions(cls, v, values):
-
         if v and (values["timestamp_from"] or values["timestamp_to"]):
             raise ValueError("Specify a temporal range or a time interval, not both")
 

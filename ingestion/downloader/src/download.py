@@ -34,7 +34,6 @@ def get_configuration(
     verbose,
     provider,
 ):
-
     configurations_func_map = {
         "get": get_mode_configuration,
         "update": update_mode_configuration,
@@ -56,7 +55,6 @@ def get_configuration(
 
 
 def get_mode_configuration(args):
-
     if not args.start_date:
         satellite = read_satellite(args.satellite_name)
         latest_record = read_latest_satellite_record(satellite)
@@ -73,7 +71,6 @@ def get_mode_configuration(args):
 
 
 def update_mode_configuration(args):
-
     if not args.start_date or not args.end_date:
         satellite = read_satellite(args.satellite_name)
 
@@ -89,7 +86,6 @@ def update_mode_configuration(args):
 
 
 def prepare(args, token):
-
     # This cell will replace the timestamp above with the one read from the `.update` file in the data directory, if it exists.
     if not isdir(args.output_directory):
         logging.info(
@@ -119,7 +115,6 @@ def prepare(args, token):
 
 
 def get_results(params, args, token):
-
     # If 401 is raised, refresh token and try one more time
     for _ in range(2):
         try:
@@ -142,7 +137,6 @@ def get_files_to_download(results):
     urls = []
     checksums = {}
     for item in results["items"]:
-
         for related_url in item["umm"]["RelatedUrls"]:
             if (related_url["Type"] == "EXTENDED METADATA") or (
                 (related_url["Type"] == "GET DATA")
@@ -175,7 +169,6 @@ def get_files_to_download(results):
 
 
 def run(args):
-
     logging.info(
         f"Ingesting data for satellite {args.satellite_name} from {args.start_date} to {args.end_date}"
     )

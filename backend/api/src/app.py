@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi import openapi
 from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
@@ -43,7 +44,8 @@ app.add_middleware(
 
 
 @app.exception_handler(ValidationError)
-async def unicorn_exception_handler(request: Request, exc: ValidationError):
+@app.exception_handler(RequestValidationError)
+async def unicorn_exception_handler(request: Request, exc):
     errors = [error["msg"] for error in exc.errors()]
     return JSONResponse(
         content=jsonable_encoder(responses.BasicResponse(errors=errors)),
