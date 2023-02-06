@@ -1,4 +1,4 @@
-../../commons/database
+git+https://688913f065115f3731fefa50b45750f3b8c0fbd5@github.com/DHI-GRAS/scatterometry.git#subdirectory=commons/database
 alembic==1.9.1
 anyio==3.6.2
 attrs==22.2.0
