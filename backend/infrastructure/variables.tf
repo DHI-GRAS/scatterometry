@@ -1,12 +1,12 @@
-variable "resourcegroup_name" {
+variable "resource_group_name" {
   description = "Name of resource group"
-  default     = "development" #"scatterometry-prod"
+  default     = "scatterometry" #"scatterometry-prod"
   type        = string
 }
 
-variable "resourcegroup_location" {
+variable "location" {
   description = "Location of resource group"
-  default     = "westeurope"
+  default     = "northeurope"
   type        = string
 }
 
@@ -25,8 +25,12 @@ variable "tags" {
   }
 }
 
-variable "resources_location" {
-  description = "Location of the resources"
-  default     = "northeurope"
-  type        = string
+# Database
+variable "postgres_server_username" {
+  default = "scatterometry_db_user"
+}
+
+variable "postgres_storage_mb" {
+  default = 524288
+  type    = number
 }

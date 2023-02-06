@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.38.0"
+      version = "~>3.42.0"
     }
     local = {}
   }
@@ -13,9 +13,9 @@ provider "azurerm" {
 
 
 # Resource Group
-resource "azurerm_resource_group" "resourcegroup" {
-  name     = "development"
-  location = "westeurope"
+resource "azurerm_resource_group" "resource_group" {
+  name     = var.resource_group_name
+  location = var.location
 
   tags = {
     "BillTo" = "GRAS"
@@ -34,23 +34,28 @@ resource "random_password" "postgres_server_password" {
   override_special = "_"
 }
 
-variable "postgres_server_username" {
-  default = "dnageneral"
-}
-
 resource "azurerm_postgresql_flexible_server" "postgres_server" {
-  name                = "dna"
-  resource_group_name = azurerm_resource_group.resourcegroup.name
-  location            = var.resources_location
+  name                = "scatterometry"
+  resource_group_name = azurerm_resource_group.resource_group.name
+  location            = var.location
   sku_name            = "GP_Standard_D2ds_v4"
   zone                = "1"
 
-  storage_mb = 131072
-  version    = "14"
-  #   administrator_login    = var.postgres_server_username
-  #   administrator_password = random_password.postgres_server_password.result
+  storage_mb             = var.postgres_storage_mb
+  version                = "14"
+  administrator_login    = var.postgres_server_username
+  administrator_password = random_password.postgres_server_password.result
 
   tags = var.tags
+}
+
+
+
+resource "azurerm_postgresql_flexible_server_firewall_rule" "dhi_vpn" {
+  name             = "dhi-vpn"
+  server_id        = azurerm_postgresql_flexible_server.postgres_server.id
+  start_ip_address = "193.3.62.162"
+  end_ip_address   = "193.3.62.162"
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "add_azure_extensions" {
@@ -65,20 +70,25 @@ resource "azurerm_postgresql_flexible_server_configuration" "add_shared_preload_
   value     = "pg_cron,pg_stat_statements,timescaledb"
 }
 
-# resource "azurerm_postgresql_database" "scatterometry_database" {
-#   name                = "scatterometry"
-#   resource_group_name = azurerm_resource_group.resourcegroup.name
-#   server_name         = azurerm_postgresql_flexible_server.postgres_server.name
-#   charset             = "UTF8"
-#   collation           = "English_United States.1252"
-# }
+resource "azurerm_postgresql_flexible_server_database" "scatterometry" {
+  name      = "scatterometry"
+  server_id = azurerm_postgresql_flexible_server.postgres_server.id
+  charset   = "UTF8"
+  collation = "English_United States.1252"
+}
+
+output "postgres_server_password" {
+  value     = random_password.postgres_server_password.result
+  sensitive = true
+}
+
 
 
 # Blob Storage
 resource "azurerm_storage_account" "storage_account" {
   name                             = "scatterometry"
-  resource_group_name              = azurerm_resource_group.resourcegroup.name
-  location                         = var.resources_location
+  resource_group_name              = azurerm_resource_group.resource_group.name
+  location                         = var.location
   cross_tenant_replication_enabled = false
   account_tier                     = "Standard"
   account_replication_type         = "LRS"
@@ -97,8 +107,8 @@ resource "azurerm_storage_container" "storage_container" {
 # Azure function
 resource "azurerm_service_plan" "scatterometry_api" {
   name                = "scatterometry-api"
-  location            = var.resources_location
-  resource_group_name = azurerm_resource_group.resourcegroup.name
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resource_group.name
   os_type             = "Linux"
   sku_name            = "Y1"
 
@@ -107,8 +117,8 @@ resource "azurerm_service_plan" "scatterometry_api" {
 
 resource "azurerm_linux_function_app" "scatterometry_api" {
   name                    = "scatterometry-api"
-  location                = var.resources_location
-  resource_group_name     = azurerm_resource_group.resourcegroup.name
+  location                = var.location
+  resource_group_name     = azurerm_resource_group.resource_group.name
   builtin_logging_enabled = true
   client_certificate_mode = "Required"
   https_only              = true

@@ -10,6 +10,8 @@ Make sure that the changes are as expected!
 ```
 terraform apply terraform.out
 ```
+Manually from the portal in the postgres flexible server enable "Allow public access from any Azure service within Azure to this server" because the terraform azure provider does not provide a way to do it automatically.
+
 
 # API
 
