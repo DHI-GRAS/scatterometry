@@ -10,3 +10,8 @@ Apply migrations with:
 ```
 alembic -c scatterometry_database/alembic.ini upgrade head
 ```
+
+Seed the database with:
+```
+python scatterometry_database/seed/main.py
+```
