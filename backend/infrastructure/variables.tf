@@ -14,7 +14,7 @@ variable "tags" {
   description = "Tags applied to common resources"
   default = {
     "BillTo"        = "GRAS"
-    "ContactPerson" = "PAKO"
+    "ContactPerson" = "THNS"
     "CostCenter"    = "18099901"
     "CostCenter2"   = "missing tag value"
     "Department"    = "GRAS-ADM"

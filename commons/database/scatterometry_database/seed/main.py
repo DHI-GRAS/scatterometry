@@ -45,17 +45,7 @@ def main():
             "flag": "1",
             "name": "bad",
             "description": "bad",
-        },
-        {
-            "flag": "2",
-            "name": "suspect",
-            "description": "suspect",
-        },
-        {
-            "flag": "3",
-            "name": "medium",
-            "description": "medium",
-        },
+        }
     ]
     for satellite_data in sattelites:
         satellite = crud.create_satellite(

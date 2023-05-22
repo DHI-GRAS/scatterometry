@@ -49,8 +49,6 @@ resource "azurerm_postgresql_flexible_server" "postgres_server" {
   tags = var.tags
 }
 
-
-
 resource "azurerm_postgresql_flexible_server_firewall_rule" "dhi_vpn" {
   name             = "dhi-vpn"
   server_id        = azurerm_postgresql_flexible_server.postgres_server.id
@@ -74,14 +72,13 @@ resource "azurerm_postgresql_flexible_server_database" "scatterometry" {
   name      = "scatterometry"
   server_id = azurerm_postgresql_flexible_server.postgres_server.id
   charset   = "UTF8"
-  collation = "English_United States.1252"
+  collation = "en_US.utf8"
 }
 
 output "postgres_server_password" {
   value     = random_password.postgres_server_password.result
   sensitive = true
 }
-
 
 
 # Blob Storage
