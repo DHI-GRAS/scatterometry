@@ -74,7 +74,7 @@ if __name__ == "__main__":
         bbox = prefect.Parameter("bbox", default=None)
         provider = prefect.Parameter("provider", default=None)
 
-        download = Download(cpus=1, memory=1, task_run_name="Download")
+        download = Download(cpus=2, memory=2, task_run_name="Download")
 
         download(
             database_url=database_url,
