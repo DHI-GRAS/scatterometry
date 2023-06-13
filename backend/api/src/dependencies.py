@@ -1,7 +1,7 @@
 import sqlmodel
 
-from fastapi import Depends, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Security
+from fastapi.security import APIKeyHeader
 from fastapi.exceptions import HTTPException
 
 from src import authentication
@@ -16,13 +16,13 @@ def db_conn():
     return db
 
 
-def authenticate(req: Request) -> bool:
-
-    access_key = req.headers.get("Authorization")
-    if not access_key:
+def authenticate(
+    api_key: str = Security(APIKeyHeader(name="Authorization", auto_error=True))
+) -> bool:
+    if not api_key:
         raise HTTPException(status_code=403)
 
-    if authentication.is_access_key_valid(access_key):
+    if authentication.is_access_key_valid(api_key):
         return True
 
     raise HTTPException(status_code=401)

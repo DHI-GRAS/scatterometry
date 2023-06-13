@@ -14,6 +14,7 @@ Manually from the portal in the postgres flexible server enable "Allow public ac
 
 
 # API
+The scatterometry-api azure function is running on Python-3.9.
 
 ## Develop
 

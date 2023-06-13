@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Security
 from uuid import uuid1
 
 from src import (
@@ -15,19 +15,25 @@ class RecordsRoute(APIRouter):
     def __init__(self) -> None:
         super().__init__()
 
-        @self.get("/records/count", response_model=responses.CountRecordsResponse)
-        async def get_records(
+        @self.get(
+            "/records/count",
+            response_model=responses.CountRecordsResponse,
+            dependencies=[Security(dependencies.authenticate)],
+        )
+        async def count_records(
             url_params: requests.RecordsUrlParams = Depends(),
-            is_authenticated: str = Depends(dependencies.authenticate),
         ):
             return responses.CountRecordsResponse(
                 data={"total_records_count": crud.count_query_records(url_params)}
             )
 
-        @self.get("/records", response_model=responses.GetRecordsResponse)
-        async def get_records(
+        @self.get(
+            "/records",
+            response_model=responses.GetRecordsResponse,
+            dependencies=[Security(dependencies.authenticate)],
+        )
+        async def get_records_csv_link(
             url_params: requests.GetRecordsUrlParams = Depends(),
-            is_authenticated: str = Depends(dependencies.authenticate),
         ):
             df, stream = database.query_to_csv_stream(crud.get_query_string(url_params))
             download_url = None

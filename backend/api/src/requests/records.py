@@ -14,13 +14,24 @@ class RecordsUrlParams(pydantic.BaseModel):
     lon_min: float = 0
     timestamp_to: Union[datetime, None] = None
     timestamp_from: Union[datetime, None] = None
-    time_interval_from_hours: pydantic.types.PositiveFloat = None
+    time_interval_from_hours: Union[
+        pydantic.types.PositiveFloat, None
+    ] = pydantic.Field(
+        Query(
+            description="Creates a time range between now and the specified hours in the past",
+            default=None,
+        )
+    )
     satellites: Union[str, None] = pydantic.Field(
-        Query(description="A comma separated list of the satellite names", default=None)
+        Query(
+            description="A comma separated list of the satellite names. Options: rscat,cygnss,oscat,qscat,ascat. Default: all",
+            default=None,
+        )
     )
     flags: Union[str, None] = pydantic.Field(
         Query(
-            description="A comma separated list of the quality flag names", default=None
+            description="A comma separated list of the quality flag names. Options: bad,good. Default: all",
+            default=None,
         )
     )
 
