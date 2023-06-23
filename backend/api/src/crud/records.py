@@ -12,16 +12,14 @@ from src import (
 def __satellites_queries(satellites):
     if not satellites:
         return None
-    satellites = ",".join(
-        [f"'{satellite.strip()}'" for satellite in satellites.split(",")]
-    )
+    satellites = [f"{satellite.strip()}" for satellite in satellites.split(",")]
     return models.Satellite.name.in_(satellites)
 
 
 def __flags_queries(flags):
     if not flags:
         return None
-    flags = ",".join([f"'{flag.strip()}'" for flag in flags.split(",")])
+    flags = [f"{flag.strip()}" for flag in flags.split(",")]
     return models.QualityFlag.name.in_(flags)
 
 
