@@ -20,3 +20,11 @@ class CountRecordsData(pydantic.BaseModel):
 
 class CountRecordsResponse(BasicResponse):
     data: CountRecordsData
+    
+    
+class LimitsData(pydantic.BaseModel):
+    MAX_TIMESTAMP_DURATION_HOURS: int
+    MAX_AREA_DEGREES: int
+    
+class LimitsResponse(BasicResponse):
+    data: LimitsData
