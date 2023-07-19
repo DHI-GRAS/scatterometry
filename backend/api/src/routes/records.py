@@ -8,6 +8,7 @@ from src import (
     dependencies,
     responses,
     requests,
+    config
 )
 
 
@@ -50,5 +51,19 @@ class RecordsRoute(APIRouter):
                     "download_url": download_url,
                     "quota_used_bytes": quota_used_bytes,
                     "total_records_count": df.shape[0],
+                }
+            )
+            
+        @self.get(
+            "/limits",
+            response_model=responses.LimitsResponse,
+            dependencies=[Security(dependencies.authenticate)],
+        )
+        async def get_limits():
+
+            return responses.LimitsResponse(
+                data={
+                    "MAX_AREA_DEGREES": config.MAX_AREA_DEGREES,
+                    "MAX_TIMESTAMP_DURATION_HOURS": config.MAX_TIMESTAMP_DURATION_HOURS
                 }
             )

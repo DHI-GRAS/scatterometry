@@ -1,6 +1,6 @@
 import enum
 import pydantic
-from typing import Union, Any, Optional
+from typing import Union, Any, Optional, List
 
 
 class Statuses(enum.Enum):
@@ -9,7 +9,7 @@ class Statuses(enum.Enum):
 
 
 class BasicResponse(pydantic.BaseModel):
-    errors: Optional[list[str]]
+    errors: Optional[List[str]]
     status: Optional[Statuses]
     message: Optional[str]
     data: Any
