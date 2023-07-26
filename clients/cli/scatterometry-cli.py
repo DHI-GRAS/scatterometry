@@ -12,6 +12,7 @@ from datetime import timedelta
 
 API_URL = os.environ.get("API_URL", "https://scatterometry-api.azurewebsites.net")
 API_RECORDS_ENDPOINT = "/records"
+API_LIMITS_ENDPOINT = "/limits"
 API_KEY = os.environ.get("API_KEY")
 print(API_KEY)
 
@@ -53,8 +54,34 @@ def records(
     api_key,
 ):
     """
-    Make a request to the records endpoint with the all the non-empty parameters and add the authentication key in the header
+    Make a request to the records endpoint with all the non-empty parameters and add the authentication key in the header
     """
+    
+        # authorization key
+
+    if not API_KEY and not api_key:
+        print("ERROR: API_KEY environment variable not set nor --api-key argument was provided")
+        return
+    if API_KEY:
+        api_key = API_KEY
+    auth_headers = {"Authorization": api_key}
+
+    # query the limits endpoint
+    limits_url = API_URL + API_LIMITS_ENDPOINT
+    response = requests.get(limits_url, headers=auth_headers)
+
+    if response.status_code == 200:
+        response_body = response.json()
+    else:
+        print("ERROR: limits request failed")
+        print(response.status_code)
+        print(response.text)
+        return
+
+    max_area = response_body["data"]["MAX_AREA_DEGREES"]
+    max_hours = response_body["data"]["MAX_TIMESTAMP_DURATION_HOURS"]
+    time_steps = int(max_hours / 24)
+    
     url = API_URL + API_RECORDS_ENDPOINT
 
     # set the filename based on the request parameters, delete file if it already exists
@@ -62,18 +89,11 @@ def records(
     if os.path.exists(os.path.join(output_dir, filename)):
         os.remove(os.path.join(output_dir, filename))
 
-    # authorization key
-    if not API_KEY and not api_key:
-        print("ERROR: API_KEY environment variable not set nor --api-key argument was provided")
-        return
-    if API_KEY:
-        api_key = API_KEY
-    auth_headers = {"Authorization": api_key}
     # loop through the different days to download all the data
     time_range = pd.date_range(start=timestamp_from, end=timestamp_to, freq="D")
 
-    for i in range(0, len(time_range) - 1, 31):
-        max_timestamp = min(time_range[i] + timedelta(days=31), time_range[-1])
+    for i in range(0, len(time_range) - 1, time_steps):
+        max_timestamp = min(time_range[i] + timedelta(days=time_steps), time_range[-1])
         print(f"DOWNLOADING TIME RANGE {time_range[i]} to {max_timestamp}")
         params_all = {
             "timestamp_from": time_range[i],
