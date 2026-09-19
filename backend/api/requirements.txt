@@ -1,6 +1,6 @@
 git+https://688913f065115f3731fefa50b45750f3b8c0fbd5@github.com/DHI-GRAS/scatterometry.git#subdirectory=commons/database
 alembic==1.9.1
-anyio==3.6.2
+anyio==4.14.2
 attrs==22.2.0
 azure-core==1.26.2
 azure-functions==1.12.0
