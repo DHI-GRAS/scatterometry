@@ -41,7 +41,7 @@ griffe==0.25.3
 h11==0.14.0
 h2==4.1.0
 HeapDict==1.0.1
-hpack==4.0.0
+hpack==4.2.0
 httpcore==0.16.3
 httpx==0.23.3
 hyperframe==6.0.1
