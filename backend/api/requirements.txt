@@ -29,7 +29,7 @@ msal-extensions==1.0.0
 msrest==0.7.1
 mypy-extensions==0.4.3
 numpy==1.24.1
-oauthlib==3.2.2
+oauthlib==4.0.0
 packaging==23.0
 pandas==1.5.2
 pathspec==0.11.0
