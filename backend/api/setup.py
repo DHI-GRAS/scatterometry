@@ -50,7 +50,7 @@ setup(
         "PyJWT==2.6.0",
         "pytest==7.2.1",
         "python-dateutil==2.8.2",
-        "python-jose==3.3.0",
+        "python-jose==3.5.0",
         "pytz==2022.7",
         "requests==2.28.2",
         "requests-oauthlib==1.3.1",
