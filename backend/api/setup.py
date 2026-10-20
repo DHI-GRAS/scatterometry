@@ -47,7 +47,7 @@ setup(
         "pyasn1==0.4.8",
         "pycparser==2.21",
         "pydantic==1.10.4",
-        "PyJWT==2.6.0",
+        "PyJWT==2.15.0",
         "pytest==7.2.1",
         "python-dateutil==2.8.2",
         "python-jose==3.3.0",
