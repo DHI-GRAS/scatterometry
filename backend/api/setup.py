@@ -13,7 +13,7 @@ setup(
         "azure-functions==1.12.0",
         "azure-identity==1.12.0",
         "azure-storage-blob==12.14.1",
-        "certifi==2022.12.7",
+        "certifi==2026.10.19",
         "cffi==1.15.1",
         "charset-normalizer==3.0.1",
         "click==8.1.3",
